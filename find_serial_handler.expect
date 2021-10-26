@@ -1,0 +1,33 @@
+#!/usr/bin/expect
+
+set timeout 4
+set OUTFILE serial.out
+set f [open "passphrase.txt"]
+set PASSPHRASE [read $f]
+close $f
+set f [open "username.txt"]
+set USERNAME [read $f]
+close $f
+set f [open "password.txt"]
+set PASSWORD [read $f]
+close $f 
+
+spawn ./find_serial.sh 
+set output [open $OUTFILE a]
+
+while true { 
+    expect {
+        "API *\r" {send "\r";exp_continue}
+        "Updated *" {puts $output "Updated!\n"; exp_continue}
+        "No change requested *" {puts $output "Already enabled!\n"; exp_continue}
+        "Enter passphrase *" {send -- "$PASSPHRASE\r" ; exp_continue}
+        "serialport: Connected to*" {send -- "\r"; exp_continue}
+        "Login incorrect*" {send -- "~."; exp_continue}
+        "* login: " {send -- "$USERNAME\r"; exp_continue}
+        "Password*" {send -- "$PASSWORD\r"; exp_continue}
+        "* packet* transmitted*" {send -- "~."; exp_continue}
+        "ping: *" {send -- "~."; exp_continue}
+        "*]$ " {send -- "hostname -f ; ping -c1 -w1 bastion\r"; exp_continue}
+    }
+}
+
