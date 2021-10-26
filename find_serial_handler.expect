@@ -27,7 +27,7 @@ while true {
         "Password*" {send -- "$PASSWORD\r"; exp_continue}
         "* packet* transmitted*" {send -- "~."; exp_continue}
         "ping: *" {send -- "~."; exp_continue}
-        "*]$ " {send -- "hostname -f ; ping -c1 -w1 bastion\r"; exp_continue}
+        "*]$ " {send -- "hostname -f ; ping -c1 -w1 some.system.com\r"; exp_continue}
     }
 }
 
